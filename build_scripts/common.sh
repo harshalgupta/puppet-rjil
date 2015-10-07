@@ -28,14 +28,24 @@ if [ -n "${xtrace_was_on}" ]; then
   set -x
 fi
 
+##
 # Load map from generic image, flavor and network names to
 # cloud specific ids
+#
+# overcast use ini file for mapping.
+##
+if [ $provisioner == 'overcast' ]; then
+  mapping_file="environment/${cloud_provider}.map.ini"
+else
+  mapping_file="environment/${cloud_provider}.map.yaml"
+fi
+
 if [ -n "${mapping}" ]
 then
 	mappings_arg="--mappings=${mapping}"
-elif [ -e "environment/${cloud_provider}.map.yaml" ]
+elif [ -e $mapping_file ]
 then
-	mappings_arg="--mappings=environment/${cloud_provider}.map.yaml"
+	mappings_arg="--mappings=${mapping_file}"
 else
 	mappings_arg=""
 fi
@@ -50,13 +60,24 @@ then
 
     # This speeds the whole process up *a lot*
     pip install pip-accel
-    if [ -n "${python_jiocloud_source_branch}" ]; then
+    if [ -n "${python_jiocloud_source_repo}" ]; then
       if [ -z "${python_jiocloud_source_branch}" ]; then
         python_jiocloud_source_branch='master'
       fi
       pip-accel install -e "${python_jiocloud_source_repo}@${python_jiocloud_source_branch}#egg=jiocloud"
     else
       pip-accel install -e git+https://github.com/JioCloud/python-jiocloud#egg=jiocloud
+    fi
+
+    if [ $provisioner == 'overcast' ]; then
+      if [ -n "${overcast_source_repo}" ]; then
+        if [ -z "${overcast_source_branch}" ]; then
+          overcast_source_branch='master'
+        fi
+        pip-accel install -e "${overcast_source_repo}@${overcast_source_branch}#egg=overcast"
+      else
+        pip-accel install -e git+https://github.com/overcastde/python-overcast#egg=overcast
+      fi
     fi
     deactivate
 fi

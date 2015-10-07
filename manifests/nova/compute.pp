@@ -48,6 +48,7 @@ class rjil::nova::compute (
   ##
   if $compute_driver == 'libvirt' {
     include ::nova::compute::neutron
+    include ::nova::compute::libvirt
 
     Package['libvirt'] -> Exec['rm_virbr0']
 
@@ -59,6 +60,8 @@ class rjil::nova::compute (
     if $rbd_enabled {
       include ::rjil::nova::compute::rbd
     }
+  } elsif $compute_driver == 'ironic' {
+    include ::nova::compute::ironic
   }
 
 
@@ -96,5 +99,15 @@ class rjil::nova::compute (
     command     => 'true ; cd /sys/class/net ; for x in *; do ethtool -K $x gro off || true; done',
     path        => '/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin:/usr/local/sbin',
     refreshonly => true
+  }
+
+  ##
+  # Remove /etc/nova/nova-compute.conf as this file is created by ubuntu
+  # package, which is not used in case of puppet but compute driver will be
+  # overridden by default entry created in this file.
+  ##
+  file {'/etc/nova/nova-compute.conf':
+    ensure  => present,
+    content => '',
   }
 }

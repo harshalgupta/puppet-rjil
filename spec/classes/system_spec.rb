@@ -9,6 +9,7 @@ describe 'rjil::system' do
       'lsbdistcodename' => 'trusty',
       'osfamily'        => 'Debian',
       'interfaces'      => 'eth0',
+      'fqdn'            => 'node.local',
     }
   end
 
@@ -41,6 +42,7 @@ describe 'rjil::system' do
       should contain_class('rjil::system::apt')
       should contain_class('rjil::system::accounts')
       should contain_package('molly-guard')
+      should contain_package('tmpreaper')
 
       should contain_file_line('domain_search') \
         .with_path('/etc/resolvconf/resolv.conf.d/base') \
@@ -59,6 +61,15 @@ describe 'rjil::system' do
       should contain_sysctl__value('net.ipv4.conf.default.accept_source_route').with_value(0)
       should contain_sysctl__value('net.ipv4.conf.all.send_redirects').with_value(0)
       should contain_sysctl__value('net.ipv4.conf.default.send_redirects').with_value(0)
+
+      should contain_cron('purge_puppet_reports').with(
+        {
+          :command => 'tmpreaper -a  24h /var/lib/puppet/reports/node.local',
+          :user    => 'root',
+          :hour    => 2,
+          :minute  => 0,
+        }
+      )
     end
   end
 end

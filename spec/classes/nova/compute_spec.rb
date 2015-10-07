@@ -83,6 +83,13 @@ describe 'rjil::nova::compute' do
 
       should contain_package('libvirt').that_comes_before('Exec[rm_virbr0]')
 
+      should contain_file('/etc/nova/nova-compute.conf').with(
+        {
+          :ensure  => 'present',
+          :content => '',
+        }
+      )
+
     end
   end
 

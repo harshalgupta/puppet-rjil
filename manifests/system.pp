@@ -4,6 +4,7 @@
 class rjil::system(
   $proxies                       = {},
   $dhclient_override_domain_name = undef,
+  $puppet_report_keep_hours      = 24,
 ) {
 
   ##
@@ -19,7 +20,21 @@ class rjil::system(
   include rjil::system::accounts
   include rjil::system::metrics
 
-  ensure_packages(['molly-guard'])
+  ensure_packages(['molly-guard','tmpreaper'])
+
+  ##
+  # delete puppet reports which are older than $puppet_report_keep_hours hours
+  # Ideally it should have added in tmpreaper daily cron script, but with the
+  # current tmpreaper daily cron script, it is not possible to provide different
+  # timespecs for different directories.
+  # Create a cron to run tmpreaper once every day
+  ##
+  cron {'purge_puppet_reports':
+    command => "tmpreaper -a  ${puppet_report_keep_hours}h /var/lib/puppet/reports/${::fqdn}",
+    user    => root,
+    hour    => 2,
+    minute  => 0
+  }
 
   ##
   # override domain name in dhclient

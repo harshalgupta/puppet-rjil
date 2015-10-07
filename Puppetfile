@@ -78,8 +78,8 @@ mod 'stackforge/openstacklib',
   :ref => 'origin/master'
 
 mod 'stackforge/ironic',
-  :git => "#{base_url}/JioCloud/puppet-ironic",
-  :ref => 'master'
+  :git => "#{base_url}/jiocloud/puppet-ironic",
+  :ref => 'origin/master'
 
 mod 'puppetlabs/concat',
   :git => "#{base_url}/puppetlabs/puppetlabs-concat",
@@ -115,7 +115,7 @@ mod 'puppetlabs/rabbitmq',
 
 mod 'puppetlabs/stdlib',
   :git => "#{base_url}/puppetlabs/puppetlabs-stdlib",
-  :ref => '4.3.2'
+  :ref => '4.8.0'
 
 mod 'stackforge/vswitch',
   :git => "#{base_url}/stackforge/puppet-vswitch",
@@ -138,7 +138,7 @@ mod 'stephenrjohnson/puppet',
   :ref => '1.0.0'
 
 mod 'jiocloud/contrail',
-  :git => "#{base_url}/jiocloud/jiocloud-contrail",
+  :git => "#{base_url}/JioCloud/jiocloud-contrail",
   :ref => 'master'
 
 mod 'deric/zookeeper',
@@ -155,7 +155,7 @@ mod 'puppet-modules/common',
 
 mod 'solarkennedy/consul',
   :git => "#{base_url}/solarkennedy/puppet-consul",
-  :ref => 'origin/master'
+  :ref => '3128b476b1f6ea695cac1f772f262c078c853032'
 
 mod 'jiocloud/openstack_zeromq',
   :git => "#{base_url}/jiocloud/puppet-openstack_zeromq"

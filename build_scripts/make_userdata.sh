@@ -78,14 +78,14 @@ if [ -n "${puppet_modules_source_repo}" ]; then
   mkdir -p /etc/puppet/hiera.overrides
   sed  -i "s/  :datadir: \/etc\/puppet\/hiera\/data/  :datadir: \/etc\/puppet\/hiera.overrides\/data/" /tmp/rjil/hiera/hiera.yaml
   cp /tmp/rjil/hiera/hiera.yaml /etc/puppet
-  cp -Rvf /tmp/rjil/hiera/data /etc/puppet/hiera.overrides
+  cp -Rf /tmp/rjil/hiera/data /etc/puppet/hiera.overrides
   mkdir -p /etc/puppet/modules.overrides/rjil
-  cp -Rvf /tmp/rjil/* /etc/puppet/modules.overrides/rjil/
+  cp -Rf /tmp/rjil/* /etc/puppet/modules.overrides/rjil/
   if [ -n "${module_git_cache}" ]
   then
     cd /etc/puppet/modules.overrides
     wget -O cache.tar.gz "${module_git_cache}"
-    tar xvzf cache.tar.gz
+    tar xzf cache.tar.gz
     time librarian-puppet update --puppetfile=/tmp/rjil/Puppetfile --path=/etc/puppet/modules.overrides
   else
     time librarian-puppet install --puppetfile=/tmp/rjil/Puppetfile --path=/etc/puppet/modules.overrides
@@ -99,12 +99,40 @@ else
   puppet apply --config_version='echo settings' -e "ini_setting { default_manifest: path => \"/etc/puppet/puppet.conf\", section => main, setting => default_manifest, value => \"/etc/puppet/manifests/site.pp\" }"
 fi
 echo 'consul_discovery_token='${consul_discovery_token} > /etc/facter/facts.d/consul.txt
+# default to first 16 bytes of discovery token
+echo 'consul_gossip_encrypt'=`echo ${consul_discovery_token} | cut -b 1-15 | base64` >> /etc/facter/facts.d/consul.txt
 echo 'current_version='${BUILD_NUMBER} > /etc/facter/facts.d/current_version.txt
 echo 'env='${env} > /etc/facter/facts.d/env.txt
 echo 'cloud_provider='${cloud_provider} > /etc/facter/facts.d/cloud_provider.txt
 if [ -n "${slack_url}" ]; then
   echo 'slack_url=${slack_url}' > /etc/facter/facts.d/slack_url.txt
 fi
+
+##
+# Disable TCP Offloading in builds on Interfaces
+# Add network config for all available interfaces, this would be usable for
+# undercloud as it will have multiple interfaces. cloudinit will only handle
+# first interface
+#
+
+if [[ \$(facter is_virtual) == true ]];
+then
+  for nic in \$(ifconfig -a | awk '/eth[0-9]+/ {print \$1}'); do
+    netconfig_content="\$netconfig_content
+file { '/etc/network/interfaces.d/\${nic}':
+  ensure  => file,
+  content => 'auto \$nic
+iface \$nic inet dhcp
+',
+}"
+    ethtool -K \${nic} tx off
+    sed -i -e "/^exit 0$/i\ethtool -K \${nic} tx off" /etc/rc.local
+  done
+
+  puppet apply --config_version='echo settings' -e "\$netconfig_content"
+fi
+
+
 ##
 # Workaround to add the swap partition for baremetal systems, as even though
 # cloudinit is creating the swap partition, its not added to the fstab and not

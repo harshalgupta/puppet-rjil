@@ -37,6 +37,20 @@ describe 'rjil::nova::controller' do
     }
   end
 
+  context 'without manage_flavors' do
+    let :params do
+      {
+        :manage_flavors => false,
+      }
+    end
+
+    it 'should not manage flavors' do
+      should_not contain_nova_flavor
+
+      should_not contain_rjil__test__nova_flavor
+    end
+  end
+
   context 'with http, defaults' do
     it  do
       should contain_class('rjil::apache')
