@@ -13,7 +13,7 @@ node /^bootstrap\d+/ {
 # These nodes wait at least one stmon to be registered in consul.
 ##
 
-node /^st\d+/ {
+node /^dssst\d+/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon_config
@@ -37,12 +37,12 @@ node /^st\d+/ {
 #
 ##
 
-node /^stmonleader1/ {
+node /^dssmonleader1/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon
-  include rjil::ceph::osd
   include rjil::ceph::radosgw
+  include rjil::jiocloud::consul::consul_alerts
 
   rjil::jiocloud::consul::service { 'stmonleader':
     port          => 6789,
@@ -59,11 +59,10 @@ node /^stmonleader1/ {
 # initialize themselves
 ##
 
-node /^stmon\d+/ {
+node /^dssmon\d+/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon
-  include rjil::ceph::osd
   include rjil::ceph::radosgw
   ensure_resource('rjil::service_blocker', 'stmonleader', {
   }
