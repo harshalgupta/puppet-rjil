@@ -14,7 +14,7 @@ rv=$?
 run_puppet() {
         # ensure that our service catalog hiera data is available
         # now run puppet
-        puppet apply --config_version='python -m jiocloud.orchestrate current_version' --detailed-exitcodes --logdest=syslog `puppet config print default_manifest`
+        puppet apply --config_version='python -m jiocloud.orchestrate current_version' --detailed-exitcodes --logdest=syslog /etc/puppet/manifests/site.pp
         # publish the results of that run
         ret_code=$?
         python -m jiocloud.orchestrate update_own_status puppet_service $ret_code
@@ -46,7 +46,7 @@ then
        (echo 'File<| title == "/etc/consul" |> { purge => false }'; echo 'File<| title == "sources.list.d" |> { purge => false }'; echo 'include rjil::system::apt' ) | puppet apply --logdest=syslog --config_version='python -m jiocloud.orchestrate current_version'
 
        apt-get update
-       apt-get dist-upgrade -o Dpkg::Options::="--force-confold" -y
+       apt-get dist-upgrade -o Dpkg::Options::="--force-confold" -y --force-yes
        run_puppet
 elif [ $rv -eq 1 ]
 then

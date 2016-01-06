@@ -1,15 +1,19 @@
-Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin/","/usr/local/sbin/" ], logoutput => true }
+Exec {
+  path      => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/", "/usr/local/bin/", "/usr/local/sbin/"],
+  logoutput => true
+}
 
 node /^bootstrap\d+/ {
   include rjil::base
   include rjil::jiocloud::consul::consul_alerts
 }
+
 ##
 # setup ceph configuration and osds on st nodes
 # These nodes wait at least one stmon to be registered in consul.
 ##
 
-node /^st\d+/ {
+node /^dssst\d+/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon_config
@@ -33,14 +37,15 @@ node /^st\d+/ {
 #
 ##
 
-node /^stmonleader1/ {
+node /^dssmonleader1/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon
-  include rjil::ceph::osd
   include rjil::ceph::radosgw
+  include rjil::jiocloud::consul::consul_alerts
+
   rjil::jiocloud::consul::service { 'stmonleader':
-    port => 6789,
+    port          => 6789,
     check_command => '/usr/lib/jiocloud/tests/check_ceph_mon.sh'
   }
 }
@@ -54,19 +59,20 @@ node /^stmonleader1/ {
 # initialize themselves
 ##
 
-node /^stmon\d+/ {
+node /^dssmon\d+/ {
   include rjil::base
   include rjil::ceph
   include rjil::ceph::mon
-  include rjil::ceph::osd
   include rjil::ceph::radosgw
-  ensure_resource('rjil::service_blocker', 'stmonleader', {})
+  ensure_resource('rjil::service_blocker', 'stmonleader', {
+  }
+  )
   Class[rjil::base] -> Rjil::Service_blocker['stmonleader']
   Rjil::Service_blocker['stmonleader'] -> Class['rjil::ceph::mon::mon_config']
 }
 
 ##
-## Setup contrail nodes
+# # Setup contrail nodes
 ##
 node /^ct\d+/ {
   include rjil::base
@@ -80,10 +86,9 @@ node /^ct\d+/ {
   include rjil::neutron::contrail
 }
 
-
 ##
-## oc is openstack controller node which will have all
-## openstack controller applications
+# # oc is openstack controller node which will have all
+# # openstack controller applications
 ##
 
 node /^oc\d+/ {
@@ -191,12 +196,13 @@ node /^uc\d+/ {
 
   Service['httpd'] -> Rjil::Service_blocker['glance']
 
-  #include rjil::jiocloud::aptmirror
+  # include rjil::jiocloud::aptmirror
 }
 
 node /^httpproxy\d+/ {
   include rjil::base
   include rjil::http_proxy
+
   dnsmasq::conf { 'google':
     ensure  => present,
     content => 'server=8.8.8.8',
@@ -206,5 +212,15 @@ node /^httpproxy\d+/ {
 
 node /^vagrant\d+/ {
   include rjil::base
-  include rjil::base::jiocloud::vagrant
+  include rjil::jiocloud::vagrant
+}
+
+node /^tools\d+/ {
+  include rjil::base
+  include rjil::commonservices::mediawiki
+  include rjil::commonservices::base
+  include rjil::commonservices::tools
+  include rjil::commonservices::jenkins::master
+  include ::omd::server
+  include ::pkgbuilder
 }

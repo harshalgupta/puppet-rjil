@@ -86,8 +86,8 @@ mod 'puppetlabs/concat',
   :ref => '1.1.1'
 
 mod 'enovance/ceph',
-  :git => "#{base_url}/jiocloud/puppet-ceph",
-  :ref => 'svn_to_git_2'
+  :git => "#{base_url}/bafna/puppet-ceph",
+  :ref => 'staging'
 
 mod 'stackforge/glance',
   :git => "#{base_url}/stackforge/puppet-glance",
@@ -215,3 +215,17 @@ mod 'unibet/vagrant',
 mod 'danzilio/danzilio-virtualbox',
   :git => "#{base_url}/danzilio/danzilio-virtualbox",
   :ref => 'origin/master'
+
+mod 'hexmode/mediawiki',
+  :git => "#{base_url}/jiocloud/puppet-mediawiki",
+  :ref => 'master'
+
+mod 'fnerdwq/omd',
+  :git => "#{base_url}/jiocloud/puppet-omd",
+  :ref => 'master'
+mod 'garethr/docker',
+  :git => "#{base_url}/jiocloud/garethr-docker",
+  :ref => 'master'
+mod 'jiocloud/pkgbuilder',
+  :git => "#{base_url}/jiocloud/pkgbuilder",
+  :ref => 'master'

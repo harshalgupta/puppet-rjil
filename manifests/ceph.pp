@@ -47,7 +47,7 @@ class rjil::ceph (
   $public_network         = undef,
   $public_if              = eth0,
   $osd_journal_type       = 'filesystem',
-  $pool_default_size      = 3
+  $pool_default_size      = undef
 ) {
 
   anchor {'rjil::ceph::start':
@@ -57,9 +57,9 @@ class rjil::ceph (
     require => Class['::ceph::conf']
   }
 
-  include ntp
+  #include ntp
 
-  Service[ntp] -> Package[ceph]
+  #Service[ntp] -> Package[ceph]
 
   if $storage_cluster_network {
     $storage_cluster_network_orig = $storage_cluster_network
@@ -110,6 +110,14 @@ class rjil::ceph (
   ## File for logrotate postrotate
   file { '/usr/local/bin/ceph-postrotate.sh':
     source => 'puppet:///modules/rjil/ceph-postrotate.sh',
+    mode => '0755',
+    owner => 'root',
+    group => 'root'
+  }
+
+  ## File for logrotate postrotate
+  file { '/usr/local/bin/dump-logs.py':
+    source => 'puppet:///modules/rjil/dump-logs.py',
     mode => '0755',
     owner => 'root',
     group => 'root'

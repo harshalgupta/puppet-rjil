@@ -149,3 +149,15 @@ fixtures:
     collectd:
       repo: https://github.com/pdxcat/puppet-module-collectd
       ref: v3.2.0
+    mediawiki:
+      repo: https://github.com/jiocloud/puppet-mediawiki
+      ref: origin/master
+    omd:
+      repo: https://github.com/jiocloud/puppet-omd
+      ref: origin/master
+    docker:
+      repo: https://github.com/jiocloud/garethr-docker
+      ref: origin/master
+    pkgbuilder:
+      repo: https://github.com/jiocloud/pkgbuilder
+      ref: origin/master
